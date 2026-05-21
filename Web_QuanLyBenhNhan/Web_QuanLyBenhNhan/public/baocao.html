@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head><meta charset="UTF-8"><title>Báo cáo thống kê</title><link rel="stylesheet" href="style.css"></head>
+<body>
+  <div class="header"><h1>Báo cáo thống kê</h1><p>Doanh thu dịch vụ, top bác sĩ và sổ khám bệnh điện tử</p></div>
+  <div class="navbar">
+    <a href="index.html">Trang chủ</a><a href="benhnhan.html">Bệnh nhân</a><a href="bacsi.html">Bác sĩ</a>
+    <a href="lichhen.html">Lịch hẹn</a><a href="phieukham.html">Phiếu khám</a><a href="baocao.html">Báo cáo</a>
+  </div>
+  <div class="container">
+    <div class="card">
+      <h2>Thống kê doanh thu theo dịch vụ</h2>
+      <button onclick="loadDoanhThu()">Tải báo cáo doanh thu</button>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Mã DV</th><th>Tên dịch vụ</th><th>Số lượt sử dụng</th><th>Tổng doanh thu</th></tr></thead>
+        <tbody id="doanhThuTable"></tbody>
+      </table></div>
+    </div>
+    <div class="card">
+      <h2>Top 3 bác sĩ có nhiều lịch hẹn nhất</h2>
+      <button onclick="loadTopBacSi()">Tải top bác sĩ</button>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Mã BS</th><th>Họ tên bác sĩ</th><th>Chuyên khoa</th><th>Số lượt đặt lịch</th><th>Số bệnh nhân khác nhau</th></tr></thead>
+        <tbody id="topBacSiTable"></tbody>
+      </table></div>
+    </div>
+    <div class="card">
+      <h2>Sổ khám bệnh điện tử</h2>
+      <p class="small-note">Nhập mã bệnh nhân, ví dụ BN001</p>
+      <div class="form-grid"><input id="maBNBaoCao" placeholder="Mã bệnh nhân" value="BN001"><button onclick="loadSoKham()">Xem sổ khám</button></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Mã BN</th><th>Họ tên</th><th>Mã PK</th><th>Ngày khám</th><th>Bác sĩ</th><th>Chuyên khoa</th><th>Dịch vụ</th><th>Chẩn đoán</th><th>Danh sách thuốc</th><th>Tổng tiền</th></tr></thead>
+        <tbody id="soKhamTable"></tbody>
+      </table></div>
+    </div>
+  </div>
+  <script src="common.js"></script>
+  <script>
+    async function loadDoanhThu() {
+      const data = await fetchJSON("/api/baocao/doanhthu");
+      const tbody = document.getElementById("doanhThuTable");
+      tbody.innerHTML = "";
+      data.forEach(row => tbody.innerHTML += `<tr><td>${row.MaDV}</td><td>${row.TenDV}</td><td>${row.SoLuotSuDung}</td><td>${formatMoney(row.TongDoanhThu)}</td></tr>`);
+    }
+    async function loadTopBacSi() {
+      const data = await fetchJSON("/api/baocao/topbacsi");
+      const tbody = document.getElementById("topBacSiTable");
+      tbody.innerHTML = "";
+      data.forEach(row => tbody.innerHTML += `<tr><td>${row.MaBS}</td><td>${row.HoTenBacSi}</td><td>${row.ChuyenKhoa}</td><td>${row.SoLuotDatLich}</td><td>${row.SoBenhNhanKhacNhau}</td></tr>`);
+    }
+    async function loadSoKham() {
+      const maBN = document.getElementById("maBNBaoCao").value.trim();
+      if (!maBN) return alert("Vui lòng nhập mã bệnh nhân.");
+      const data = await fetchJSON(`/api/baocao/sokham/${maBN}`);
+      const tbody = document.getElementById("soKhamTable");
+      tbody.innerHTML = "";
+      if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10">Không tìm thấy dữ liệu.</td></tr>`;
+        return;
+      }
+      data.forEach(row => {
+        tbody.innerHTML += `<tr><td>${row.MaBN}</td><td>${row.HoTenBenhNhan}</td><td>${row.MaPK}</td><td>${formatDate(row.NgayKham)}</td><td>${row.BacSiPhuTrach}</td><td>${row.ChuyenKhoa}</td><td>${row.DichVuKham}</td><td>${row.ChanDoan || ""}</td><td>${row.DanhSachThuoc || ""}</td><td>${formatMoney(row.TongTienCanThanhToan)}</td></tr>`;
+      });
+    }
+    loadDoanhThu(); loadTopBacSi(); loadSoKham();
+  </script>
+</body>
+</html>

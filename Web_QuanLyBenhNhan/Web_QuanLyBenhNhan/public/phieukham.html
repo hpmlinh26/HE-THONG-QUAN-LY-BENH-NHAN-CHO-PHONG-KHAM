@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head><meta charset="UTF-8"><title>Quản lý phiếu khám</title><link rel="stylesheet" href="style.css"></head>
+<body>
+  <div class="header"><h1>Quản lý phiếu khám</h1><p>Thêm phiếu khám và chi tiết đơn thuốc</p></div>
+  <div class="navbar">
+    <a href="index.html">Trang chủ</a><a href="benhnhan.html">Bệnh nhân</a><a href="bacsi.html">Bác sĩ</a>
+    <a href="lichhen.html">Lịch hẹn</a><a href="phieukham.html">Phiếu khám</a><a href="baocao.html">Báo cáo</a>
+  </div>
+  <div class="container">
+    <div class="card">
+      <h2>Thêm phiếu khám</h2>
+      <form id="phieuKhamForm" class="form-grid">
+        <input name="MaPK" placeholder="Mã phiếu khám, ví dụ PK011" maxlength="5" required>
+        <select id="MaBN" name="MaBN" required></select>
+        <select id="MaBS" name="MaBS" required></select>
+        <select id="MaDV" name="MaDV" required></select>
+        <input name="NgayKham" type="date" required>
+        <input name="TrieuChung" placeholder="Triệu chứng">
+        <input name="ChanDoan" placeholder="Chẩn đoán">
+        <input name="TongTien" type="number" placeholder="Tổng tiền">
+        <button type="submit">Thêm phiếu khám</button>
+      </form>
+      <div id="messagePK" class="message"></div>
+    </div>
+    <div class="card">
+      <h2>Thêm thuốc vào đơn</h2>
+      <form id="thuocForm" class="form-grid">
+        <select id="MaPKThuoc" name="MaPK" required></select>
+        <select id="MaThuoc" name="MaThuoc" required></select>
+        <input name="SoLuong" type="number" min="1" placeholder="Số lượng" required>
+        <input name="LieuDung" placeholder="Liều dùng">
+        <button type="submit">Thêm thuốc</button>
+      </form>
+      <div id="messageThuoc" class="message"></div>
+    </div>
+    <div class="card"><h2>Danh sách phiếu khám</h2><div class="table-wrap"><table>
+      <thead><tr><th>Mã PK</th><th>Bệnh nhân</th><th>Bác sĩ</th><th>Dịch vụ</th><th>Ngày khám</th><th>Triệu chứng</th><th>Chẩn đoán</th><th>Tổng tiền</th></tr></thead>
+      <tbody id="phieuKhamTable"></tbody>
+    </table></div></div>
+    <div class="card"><h2>Chi tiết đơn thuốc</h2><div class="table-wrap"><table>
+      <thead><tr><th>Mã PK</th><th>Mã thuốc</th><th>Tên thuốc</th><th>Số lượng</th><th>Liều dùng</th></tr></thead>
+      <tbody id="chiTietThuocTable"></tbody>
+    </table></div></div>
+  </div>
+  <script src="common.js"></script>
+  <script>
+    const phieuKhamForm = document.getElementById("phieuKhamForm");
+    const thuocForm = document.getElementById("thuocForm");
+    async function loadSelects() {
+      const [benhNhan, bacSi, dichVu, thuoc, phieuKham] = await Promise.all([
+        fetchJSON("/api/benhnhan"), fetchJSON("/api/bacsi"), fetchJSON("/api/dichvu"), fetchJSON("/api/thuoc"), fetchJSON("/api/phieukham")
+      ]);
+      fillSelect("MaBN", benhNhan, "MaBN", bn => `${bn.MaBN} - ${bn.HoTen}`);
+      fillSelect("MaBS", bacSi, "MaBS", bs => `${bs.MaBS} - ${bs.HoTen}`);
+      fillSelect("MaDV", dichVu, "MaDV", dv => `${dv.MaDV} - ${dv.TenDV}`);
+      fillSelect("MaThuoc", thuoc, "MaThuoc", t => `${t.MaThuoc} - ${t.TenThuoc}`);
+      fillSelect("MaPKThuoc", phieuKham, "MaPK", pk => `${pk.MaPK} - ${pk.HoTenBenhNhan}`);
+    }
+    async function loadPhieuKham() {
+      const data = await fetchJSON("/api/phieukham");
+      const tbody = document.getElementById("phieuKhamTable");
+      tbody.innerHTML = "";
+      data.forEach(pk => {
+        tbody.innerHTML += `<tr><td>${pk.MaPK}</td><td>${pk.MaBN} - ${pk.HoTenBenhNhan}</td><td>${pk.MaBS} - ${pk.HoTenBacSi}</td><td>${pk.MaDV} - ${pk.TenDV}</td><td>${formatDate(pk.NgayKham)}</td><td>${pk.TrieuChung || ""}</td><td>${pk.ChanDoan || ""}</td><td>${formatMoney(pk.TongTien)}</td></tr>`;
+      });
+    }
+    async function loadChiTietThuoc() {
+      const data = await fetchJSON("/api/chitietdonthuoc");
+      const tbody = document.getElementById("chiTietThuocTable");
+      tbody.innerHTML = "";
+      data.forEach(ct => {
+        tbody.innerHTML += `<tr><td>${ct.MaPK}</td><td>${ct.MaThuoc}</td><td>${ct.TenThuoc}</td><td>${ct.SoLuong}</td><td>${ct.LieuDung || ""}</td></tr>`;
+      });
+    }
+    phieuKhamForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      try {
+        const result = await fetchJSON("/api/phieukham", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(getFormData(phieuKhamForm)) });
+        showMessage("messagePK", result.message, true); phieuKhamForm.reset(); await loadPhieuKham(); await loadSelects();
+      } catch (err) { showMessage("messagePK", err.message, false); }
+    });
+    thuocForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      try {
+        const result = await fetchJSON("/api/chitietdonthuoc", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(getFormData(thuocForm)) });
+        showMessage("messageThuoc", result.message, true); thuocForm.reset(); loadChiTietThuoc();
+      } catch (err) { showMessage("messageThuoc", err.message, false); }
+    });
+    loadSelects(); loadPhieuKham(); loadChiTietThuoc();
+  </script>
+</body>
+</html>

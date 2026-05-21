@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head><meta charset="UTF-8"><title>Danh sách bác sĩ</title><link rel="stylesheet" href="style.css"></head>
+<body>
+  <div class="header"><h1>Danh sách bác sĩ</h1><p>Hiển thị bác sĩ, chuyên khoa và phòng khám</p></div>
+  <div class="navbar">
+    <a href="index.html">Trang chủ</a><a href="benhnhan.html">Bệnh nhân</a><a href="bacsi.html">Bác sĩ</a>
+    <a href="lichhen.html">Lịch hẹn</a><a href="phieukham.html">Phiếu khám</a><a href="baocao.html">Báo cáo</a>
+  </div>
+  <div class="container"><div class="card">
+    <h2>Danh sách bác sĩ</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Mã BS</th><th>Họ tên</th><th>Giới tính</th><th>SĐT</th><th>Chuyên khoa</th><th>Phòng khám</th></tr></thead>
+      <tbody id="bacSiTable"></tbody>
+    </table></div>
+  </div></div>
+  <script src="common.js"></script>
+  <script>
+    async function loadBacSi() {
+      const data = await fetchJSON("/api/bacsi");
+      const tbody = document.getElementById("bacSiTable");
+      tbody.innerHTML = "";
+      data.forEach(bs => {
+        tbody.innerHTML += `<tr><td>${bs.MaBS}</td><td>${bs.HoTen}</td><td>${bs.GioiTinh || ""}</td><td>${bs.SoDienThoai || ""}</td><td>${bs.TenCK}</td><td>${bs.TenPhong}</td></tr>`;
+      });
+    }
+    loadBacSi();
+  </script>
+</body>
+</html>

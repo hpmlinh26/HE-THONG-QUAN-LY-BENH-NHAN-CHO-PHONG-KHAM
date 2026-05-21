@@ -1,0 +1,2 @@
+CREATE DATABASE QL_BenhNhan_PhongKham;
+GO

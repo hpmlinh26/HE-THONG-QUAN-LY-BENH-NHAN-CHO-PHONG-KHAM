@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head><meta charset="UTF-8"><title>Quản lý lịch hẹn</title><link rel="stylesheet" href="style.css"></head>
+<body>
+  <div class="header"><h1>Quản lý lịch hẹn</h1><p>Tạo lịch hẹn khám giữa bệnh nhân và bác sĩ</p></div>
+  <div class="navbar">
+    <a href="index.html">Trang chủ</a><a href="benhnhan.html">Bệnh nhân</a><a href="bacsi.html">Bác sĩ</a>
+    <a href="lichhen.html">Lịch hẹn</a><a href="phieukham.html">Phiếu khám</a><a href="baocao.html">Báo cáo</a>
+  </div>
+  <div class="container">
+    <div class="card">
+      <h2>Thêm lịch hẹn</h2>
+      <form id="lichHenForm" class="form-grid">
+        <input name="MaLH" placeholder="Mã lịch hẹn, ví dụ LH011" maxlength="5" required>
+        <select id="MaBN" name="MaBN" required></select>
+        <select id="MaBS" name="MaBS" required></select>
+        <input name="NgayHen" type="date" required>
+        <input name="GioHen" type="time" required>
+        <select name="TrangThai"><option value="Đã đặt">Đã đặt</option><option value="Đã khám">Đã khám</option><option value="Đã hủy">Đã hủy</option></select>
+        <button type="submit">Thêm lịch hẹn</button>
+      </form>
+      <div id="message" class="message"></div>
+    </div>
+    <div class="card"><h2>Danh sách lịch hẹn</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Mã LH</th><th>Bệnh nhân</th><th>Bác sĩ</th><th>Ngày hẹn</th><th>Giờ hẹn</th><th>Trạng thái</th></tr></thead>
+        <tbody id="lichHenTable"></tbody>
+      </table></div>
+    </div>
+  </div>
+  <script src="common.js"></script>
+  <script>
+    const form = document.getElementById("lichHenForm");
+    async function loadSelects() {
+      const [benhNhan, bacSi] = await Promise.all([fetchJSON("/api/benhnhan"), fetchJSON("/api/bacsi")]);
+      fillSelect("MaBN", benhNhan, "MaBN", bn => `${bn.MaBN} - ${bn.HoTen}`);
+      fillSelect("MaBS", bacSi, "MaBS", bs => `${bs.MaBS} - ${bs.HoTen}`);
+    }
+    async function loadLichHen() {
+      const data = await fetchJSON("/api/lichhen");
+      const tbody = document.getElementById("lichHenTable");
+      tbody.innerHTML = "";
+      data.forEach(lh => {
+        tbody.innerHTML += `<tr><td>${lh.MaLH}</td><td>${lh.MaBN} - ${lh.HoTenBenhNhan}</td><td>${lh.MaBS} - ${lh.HoTenBacSi}</td><td>${formatDate(lh.NgayHen)}</td><td>${lh.GioHen ? String(lh.GioHen).substring(0,5) : ""}</td><td>${lh.TrangThai}</td></tr>`;
+      });
+    }
+    form.addEventListener("submit", async e => {
+      e.preventDefault();
+      try {
+        const result = await fetchJSON("/api/lichhen", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(getFormData(form)) });
+        showMessage("message", result.message, true); form.reset(); loadLichHen();
+      } catch (err) { showMessage("message", err.message, false); }
+    });
+    loadSelects(); loadLichHen();
+  </script>
+</body>
+</html>

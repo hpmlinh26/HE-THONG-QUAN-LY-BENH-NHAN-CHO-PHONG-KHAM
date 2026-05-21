@@ -1,0 +1,16 @@
+{
+  "name": "web-quan-ly-benh-nhan",
+  "version": "1.0.0",
+  "description": "Demo web quản lý bệnh nhân kết nối SQL Server 2014",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.3",
+    "mssql": "^10.0.4",
+    "msnodesqlv8": "^4.1.0"
+  }
+}
