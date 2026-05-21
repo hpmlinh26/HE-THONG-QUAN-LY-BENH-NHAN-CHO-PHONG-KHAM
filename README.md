@@ -47,6 +47,7 @@ HE-THONG-QUAN-LY-BENH-NHAN-CHO-PHONG-KHAM
 │   │   ├── bacsi.html
 │   │   ├── lichhen.html
 │   │   ├── phieukham.html
+│   │   ├── hosobenhan
 │   │   ├── baocao.html
 │   │   ├── style.css
 │   │   └── common.js
