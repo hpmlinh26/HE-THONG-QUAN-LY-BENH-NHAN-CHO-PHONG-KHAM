@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lý hồ sơ bệnh án</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="header">
+    <h1>Quản lý hồ sơ bệnh án</h1>
+    <p>Thêm và xem hồ sơ bệnh án của bệnh nhân</p>
+  </div>
+
+  <div class="navbar">
+    <a href="index.html">Trang chủ</a>
+    <a href="benhnhan.html">Bệnh nhân</a>
+    <a href="bacsi.html">Bác sĩ</a>
+    <a href="lichhen.html">Lịch hẹn</a>
+    <a href="phieukham.html">Phiếu khám</a>
+    <a href="hosobenhan.html">Hồ sơ bệnh án</a>
+    <a href="baocao.html">Báo cáo</a>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <h2>Thêm hồ sơ bệnh án</h2>
+
+      <form id="hoSoForm" class="form-grid">
+        <input name="MaHS" placeholder="Mã hồ sơ, ví dụ HS011" maxlength="5" required>
+
+        <select id="MaBN" name="MaBN" required></select>
+
+        <input name="NgayLap" type="date" required>
+
+        <input name="ChanDoan" placeholder="Chẩn đoán">
+
+        <input name="KetQua" placeholder="Kết quả điều trị">
+
+        <button type="submit">Thêm hồ sơ</button>
+      </form>
+
+      <div id="message" class="message"></div>
+    </div>
+
+    <div class="card">
+      <h2>Danh sách hồ sơ bệnh án</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Mã HS</th>
+              <th>Bệnh nhân</th>
+              <th>Ngày lập</th>
+              <th>Chẩn đoán</th>
+              <th>Kết quả</th>
+            </tr>
+          </thead>
+          <tbody id="hoSoTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="common.js"></script>
+  <script>
+    const form = document.getElementById("hoSoForm");
+    const tableBody = document.getElementById("hoSoTable");
+
+    async function loadBenhNhanSelect() {
+      try {
+        const benhNhan = await fetchJSON("/api/benhnhan");
+        fillSelect("MaBN", benhNhan, "MaBN", bn => `${bn.MaBN} - ${bn.HoTen}`);
+      } catch (err) {
+        showMessage("message", err.message, false);
+      }
+    }
+
+    async function loadHoSoBenhAn() {
+      try {
+        const data = await fetchJSON("/api/hosobenhan");
+
+        tableBody.innerHTML = "";
+
+        data.forEach(hs => {
+          tableBody.innerHTML += `
+            <tr>
+              <td>${hs.MaHS}</td>
+              <td>${hs.MaBN} - ${hs.HoTenBenhNhan}</td>
+              <td>${formatDate(hs.NgayLap)}</td>
+              <td>${hs.ChanDoan || ""}</td>
+              <td>${hs.KetQua || ""}</td>
+            </tr>
+          `;
+        });
+      } catch (err) {
+        showMessage("message", err.message, false);
+      }
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      try {
+        const data = getFormData(form);
+
+        const result = await fetchJSON("/api/hosobenhan", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        });
+
+        showMessage("message", result.message, true);
+
+        form.reset();
+        await loadHoSoBenhAn();
+      } catch (err) {
+        showMessage("message", err.message, false);
+      }
+    });
+
+    loadBenhNhanSelect();
+    loadHoSoBenhAn();
+  </script>
+</body>
+</html>

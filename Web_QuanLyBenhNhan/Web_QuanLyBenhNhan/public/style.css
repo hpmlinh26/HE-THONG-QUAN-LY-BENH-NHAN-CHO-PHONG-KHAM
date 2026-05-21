@@ -44,7 +44,7 @@ body {
 .card h2 { margin-top: 0; color: #0f4c81; }
 .grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 14px;
 }
 .menu-card {
@@ -60,7 +60,7 @@ body {
 .menu-card h3 { margin: 0 0 8px; color: #0f4c81; }
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
 input, select, textarea {

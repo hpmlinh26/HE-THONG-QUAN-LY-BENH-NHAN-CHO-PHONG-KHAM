@@ -54,3 +54,8 @@ http://localhost:3000
 - `/lichhen.html`: Quản lý lịch hẹn
 - `/phieukham.html`: Quản lý phiếu khám và đơn thuốc
 - `/baocao.html`: Báo cáo
+
+
+## Chức năng bổ sung
+
+- Quản lý hồ sơ bệnh án: xem danh sách và thêm hồ sơ bệnh án cho bệnh nhân.

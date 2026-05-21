@@ -312,6 +312,60 @@ app.get("/api/baocao/sokham/:maBN", async (req, res) => {
   } catch (err) { sendError(res, err); }
 });
 
+
+// API hồ sơ bệnh án
+app.get("/api/hosobenhan", async (req, res) => {
+  try {
+    const pool = await getPool();
+    const result = await pool.request().query(`
+      SELECT 
+        HS.MaHS,
+        HS.MaBN,
+        BN.HoTen AS HoTenBenhNhan,
+        HS.NgayLap,
+        HS.ChanDoan,
+        HS.KetQua
+      FROM HoSoBenhAn HS
+      INNER JOIN BenhNhan BN ON HS.MaBN = BN.MaBN
+      ORDER BY HS.NgayLap DESC, HS.MaHS
+    `);
+    res.json(result.recordset);
+  } catch (err) { sendError(res, err); }
+});
+
+app.post("/api/hosobenhan", async (req, res) => {
+  try {
+    const { MaHS, MaBN, NgayLap, ChanDoan, KetQua } = req.body;
+
+    if (!MaHS || !MaBN || !NgayLap) {
+      return res.status(400).json({
+        success: false,
+        message: "Vui lòng nhập mã hồ sơ, bệnh nhân và ngày lập."
+      });
+    }
+
+    const pool = await getPool();
+
+    await pool.request()
+      .input("MaHS", sql.Char(5), MaHS)
+      .input("MaBN", sql.Char(5), MaBN)
+      .input("NgayLap", sql.Date, NgayLap)
+      .input("ChanDoan", sql.NVarChar(500), ChanDoan || null)
+      .input("KetQua", sql.NVarChar(500), KetQua || null)
+      .query(`
+        INSERT INTO HoSoBenhAn
+        (MaHS, MaBN, NgayLap, ChanDoan, KetQua)
+        VALUES
+        (@MaHS, @MaBN, @NgayLap, @ChanDoan, @KetQua)
+      `);
+
+    res.json({
+      success: true,
+      message: "Thêm hồ sơ bệnh án thành công."
+    });
+  } catch (err) { sendError(res, err); }
+});
+
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);
 });
