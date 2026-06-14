@@ -3,7 +3,7 @@
 Đây là bài tập lớn môn **Cơ sở dữ liệu**, đề tài **“Hệ thống quản lý bệnh nhân cho phòng khám”**.  
 Project tập trung vào việc phân tích nghiệp vụ, thiết kế cơ sở dữ liệu quan hệ, chuẩn hóa dữ liệu đến chuẩn 3NF, cài đặt trên SQL Server và xây dựng một website demo hỗ trợ nhập liệu, tra cứu dữ liệu.
 
-## Mục tiêu đề tài
+## Mục tiêu đề tài  
 
 Đề tài được xây dựng nhằm hỗ trợ quản lý thông tin trong phòng khám, bao gồm:
 
